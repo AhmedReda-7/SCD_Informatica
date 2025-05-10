@@ -11,95 +11,74 @@ processing employee data sourced from an HR system.
 
 # 🛠️ Workflow Overview
 Source System
-Table: HR.EMPLOYEES (Oracle)
+- Table: HR.EMPLOYEES (Oracle)
 
-Method: Full extract using Source Qualifier
+- Method: Full extract using Source Qualifier
 
-Key Field: EMPLOYEE_ID
+- Key Field: EMPLOYEE_ID
 
-Data Fields: FIRST_NAME, LAST_NAME, JOB_ID, SALARY, DEPARTMENT_ID, etc.
+- Data Fields: FIRST_NAME, LAST_NAME, JOB_ID, SALARY, DEPARTMENT_ID, etc.
 
 # 🔹 SCD Type 1 (Mapping: M_EMP_SCD_T1)
 # ![M_SCD_T1](https://raw.githubusercontent.com/AhmedReda-7/SCD_Informatica/main/M_SCD_T1.png)
-Workflow:
-
-
-[Source] → [SQ_EMPLOYEES] → [LKP_EMP_SCD_T1] → [EXP_EMP_SCD_T1] → [RTR_EMP_SCD_T1_INS_UPD]
-              │                                       │
-              │                                       ├──→ [EMPLOYEES_SCD_T1_INSERT] (new records)
-              └──→ [EMPLOYEES_SCD_T1_UPDATE] (existing records)
 
 Logic:
 
-Lookup checks if the employee exists in the target.
+- Lookup checks if the employee exists in the target.
 
-Router splits into:
+- Router splits into:
 
-Insert: New employees
+- Insert: New employees
 
-Update: Changes in JOB_ID, SALARY, or DEPARTMENT_ID
+- Update: Changes in JOB_ID, SALARY, or DEPARTMENT_ID
 
-Existing data is overwritten (no history retained).
+- Existing data is overwritten (no history retained).
 
 # 🔸 SCD Type 2 (Mapping: M_EMP_SCD_T2)
 # ![M_SCD_T2](https://raw.githubusercontent.com/AhmedReda-7/SCD_Informatica/main/M_SCD_T2.png)
 
-Workflow:
-
-[Source] → [SQ_EMPLOYEES] → [SEQ_EMP_SCD_T2_SURR_KEY] → [LKP_EMP_SCD_T2] → [EXP_EMP_SCD_T2] → [RTR_EMP_SCD_T2]
-                                                                             │
-                                                                             ├──→ [EXP_EMP_SCD_T2_INS] → [EMPLOYEES_SCD_T2_INSERT]
-                                                                             └──→ [EXP_EMP_SCD_T2_UPD] → [UPD_EMP_SCD_T2] → [EMPLOYEES_SCD_T2_UPDATE]
-
 Logic:
 
-Generates surrogate keys using a Sequence Generator
+- Generates surrogate keys using a Sequence Generator
 
-Lookup checks current record where CURRENT_FLAG = 1
+- Lookup checks current record where CURRENT_FLAG = 1
 
-Router splits into:
+- Router splits into:
 
-Insert: New version with:
+- Insert: New version with:
 
-New surrogate key
+- New surrogate key
 
-CURRENT_FLAG = 1
+- CURRENT_FLAG = 1
 
-START_DATE = SYSDATE
+- START_DATE = SYSDATE
 
-Update: Expire current record by:
+- Update: Expire current record by:
 
-Setting END_DATE = SYSDATE - 1
+- Setting END_DATE = SYSDATE - 1
 
-CURRENT_FLAG = 0
+- CURRENT_FLAG = 0
 
-Complete history maintained.
+- Complete history maintained.
 
 # 🔹 SCD Type 3 (Mapping: M_EMP_SCD_T3)
 # ![M_SCD_T3](https://raw.githubusercontent.com/AhmedReda-7/SCD_Informatica/main/M_SCD_T3.png)
 
-Workflow:
-
-[Source] → [SQ_EMPLOYEES] → [LKPTRANS] → [RTRTRANS]
-                                       │
-                                       ├──→ [EMPLOYEES_SCD_T3_INS] (new records)
-                                       └──→ [UPDTRANS] → [EMPLOYEES_SCD_T3_UPD] (updates)
-
 Logic:
 
-Lookup fetches current record
+- Lookup fetches current record
 
-Router splits into:
+- Router splits into:
 
-Insert: For new employees
+- Insert: For new employees
 
-Update: If JOB_ID changes
+- Update: If JOB_ID changes
 
-Move current JOB_ID to PREV_JOB
+- Move current JOB_ID to PREV_JOB
 
-Update CURRENT_JOB with new value
+- Update CURRENT_JOB with new value
 
-Maintains limited history (current + previous job only)
+- Maintains limited history (current + previous job only)
 
 # 🔄 Execution Flow
 Initial Load
@@ -112,16 +91,16 @@ Full Extract from source
 - SCD Type 3: Inserts with PREV_JOB = NULL
 
 # Incremental Load
-SCD Type 1: Overwrites changed values in place
+- SCD Type 1: Overwrites changed values in place
 
-SCD Type 2: Expires old version, inserts new version
+- SCD Type 2: Expires old version, inserts new version
 
-SCD Type 3: Updates CURRENT_JOB, stores old in PREV_JOB
+- SCD Type 3: Updates CURRENT_JOB, stores old in PREV_JOB
 
 # ⚠️ Error Handling
-Default Router paths handle unchanged records
+- Default Router paths handle unchanged records
 
-Update Strategy transformations manage constraints and DML logic
+- Update Strategy transformations manage constraints and DML logic
 
 # 🧰 Key Components
 Component	Purpose
