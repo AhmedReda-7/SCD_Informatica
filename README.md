@@ -1,12 +1,13 @@
 # 📊 Informatica SCD Implementation Workflow
-This project demonstrates three approaches for handling Slowly Changing Dimensions (SCD) in Informatica PowerCenter, processing employee data sourced from an HR system.
+This project demonstrates three approaches for handling Slowly Changing Dimensions (SCD) in Informatica PowerCenter, 
+processing employee data sourced from an HR system.
 
 # 🔁 SCD Types Covered
-SCD Type 1: Overwrites existing data with current values (no history)
+- SCD Type 1: Overwrites existing data with current values (no history)
 
-SCD Type 2: Maintains full historical changes using versioning
+- SCD Type 2: Maintains full historical changes using versioning
 
-SCD Type 3: Maintains limited history (e.g., current and previous values)
+- SCD Type 3: Maintains limited history (current and previous values)
 
 # 🛠️ Workflow Overview
 Source System
@@ -22,13 +23,12 @@ Data Fields: FIRST_NAME, LAST_NAME, JOB_ID, SALARY, DEPARTMENT_ID, etc.
 # ![M_SCD_T1](https://raw.githubusercontent.com/AhmedReda-7/SCD_Informatica/main/M_SCD_T1.png)
 Workflow:
 
-scss
-Copy
-Edit
+
 [Source] → [SQ_EMPLOYEES] → [LKP_EMP_SCD_T1] → [EXP_EMP_SCD_T1] → [RTR_EMP_SCD_T1_INS_UPD]
               │                                       │
               │                                       ├──→ [EMPLOYEES_SCD_T1_INSERT] (new records)
               └──→ [EMPLOYEES_SCD_T1_UPDATE] (existing records)
+
 Logic:
 
 Lookup checks if the employee exists in the target.
@@ -46,13 +46,11 @@ Existing data is overwritten (no history retained).
 
 Workflow:
 
-css
-Copy
-Edit
 [Source] → [SQ_EMPLOYEES] → [SEQ_EMP_SCD_T2_SURR_KEY] → [LKP_EMP_SCD_T2] → [EXP_EMP_SCD_T2] → [RTR_EMP_SCD_T2]
-              │                                                              │
-              │                                                              ├──→ [EXP_EMP_SCD_T2_INS] → [EMPLOYEES_SCD_T2_INSERT]
-              │                                                              └──→ [EXP_EMP_SCD_T2_UPD] → [UPD_EMP_SCD_T2] → [EMPLOYEES_SCD_T2_UPDATE]
+                                                                             │
+                                                                             ├──→ [EXP_EMP_SCD_T2_INS] → [EMPLOYEES_SCD_T2_INSERT]
+                                                                             └──→ [EXP_EMP_SCD_T2_UPD] → [UPD_EMP_SCD_T2] → [EMPLOYEES_SCD_T2_UPDATE]
+
 Logic:
 
 Generates surrogate keys using a Sequence Generator
@@ -82,13 +80,11 @@ Complete history maintained.
 
 Workflow:
 
-scss
-Copy
-Edit
 [Source] → [SQ_EMPLOYEES] → [LKPTRANS] → [RTRTRANS]
-              │                        │
-              │                        ├──→ [EMPLOYEES_SCD_T3_INS] (new records)
-              │                        └──→ [UPDTRANS] → [EMPLOYEES_SCD_T3_UPD] (updates)
+                                       │
+                                       ├──→ [EMPLOYEES_SCD_T3_INS] (new records)
+                                       └──→ [UPDTRANS] → [EMPLOYEES_SCD_T3_UPD] (updates)
+
 Logic:
 
 Lookup fetches current record
@@ -109,11 +105,11 @@ Maintains limited history (current + previous job only)
 Initial Load
 Full Extract from source
 
-SCD Type 1: Inserts all rows
+- SCD Type 1: Inserts all rows
 
-SCD Type 2: Inserts with CURRENT_FLAG = 1
+- SCD Type 2: Inserts with CURRENT_FLAG = 1
 
-SCD Type 3: Inserts with PREV_JOB = NULL
+- SCD Type 3: Inserts with PREV_JOB = NULL
 
 # Incremental Load
 SCD Type 1: Overwrites changed values in place
@@ -129,21 +125,8 @@ Update Strategy transformations manage constraints and DML logic
 
 # 🧰 Key Components
 Component	Purpose
-Lookup	Identify existing records
-Router	Route records based on change detection
-Expression	Derive values, flags, and format fields
-Update Strategy	Define insert/update logic
-Sequence Generator	Create surrogate keys (used in SCD Type 2)
-
-# 📁 Folder Structure
-pgsql
-Copy
-Edit
-/SCD-Implementation
-├── mappings/
-│   ├── M_EMP_SCD_T1.xml
-│   ├── M_EMP_SCD_T2.xml
-│   └── M_EMP_SCD_T3.xml
-├── README.md
-└── docs/
-    └── scd-diagram.png
+- Lookup :	Identify existing records
+- Router :	Route records based on change detection
+- Expression :	Derive values, flags, and format fields
+- Update Strategy	: Define insert/update logic
+- Sequence Generator	: Create surrogate keys (used in SCD Type 2)
