@@ -61,6 +61,9 @@ Logic:
 
 - Complete history maintained.
 
+Result with flags - will be like this: 
+# ![R_M_SCD_T2](https://raw.githubusercontent.com/AhmedReda-7/SCD_Informatica/main/R_M_SCD_T2.png)
+
 # 🔹 SCD Type 3 (Mapping: M_EMP_SCD_T3)
 # ![M_SCD_T3](https://raw.githubusercontent.com/AhmedReda-7/SCD_Informatica/main/M_SCD_T3.png)
 
